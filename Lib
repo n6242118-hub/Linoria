@@ -2102,7 +2102,7 @@ function Library:CreateWindow(...)
     local Outer = Library:Create('Frame', {
         AnchorPoint = Config.AnchorPoint,
         BackgroundColor3 = Color3.new(0, 0, 0);
-        BackgroundTransparency = 1; -- ПРОЗРАЧНЫЙ
+        BackgroundTransparency = 1; -- ПРОЗРАЧНЫЙ (чтобы видеть картинку)
         BorderSizePixel = 0;
         Position = Config.Position,
         Size = Config.Size,
@@ -2124,10 +2124,10 @@ function Library:CreateWindow(...)
         Parent = Outer
     });
 
-    -- РАМКА ОКНА (НЕ прозрачная, синяя обводка видна)
+    -- РАМКА ОКНА (НЕ прозрачная, видна как есть)
     local Inner = Library:Create('Frame', {
         BackgroundColor3 = Library.MainColor;
-        BackgroundTransparency = 0; -- НЕ ПРОЗРАЧНЫЙ
+        BackgroundTransparency = 0; -- НЕ ПРОЗРАЧНЫЙ (видна рамка)
         BorderColor3 = Library.AccentColor;
         BorderMode = Enum.BorderMode.Inset;
         Position = UDim2.new(0, 1, 0, 1);
@@ -2204,10 +2204,10 @@ function Library:CreateWindow(...)
         local Tab = { Groupboxes = {}; Tabboxes = {}; };
         local TabButtonWidth = Library:GetTextBounds(Name, Library.Font, 16);
 
-        -- ТАБЫ (НЕ прозрачные, видны как обычно)
+        -- ТАБЫ (НЕ прозрачные, видны как есть)
         local TabButton = Library:Create('Frame', {
             BackgroundColor3 = Library.BackgroundColor;
-            BackgroundTransparency = 0; -- НЕ ПРОЗРАЧНЫЙ
+            BackgroundTransparency = 0; -- НЕ ПРОЗРАЧНЫЙ (виден таб)
             BorderColor3 = Library.OutlineColor;
             Size = UDim2.new(0, TabButtonWidth + 8 + 4, 1, 0);
             ZIndex = 1;
