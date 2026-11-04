@@ -1022,9 +1022,9 @@ do
         if type(Info.Tooltip) == 'string' then Library:AddToolTip(Info.Tooltip, TextBoxOuter) end
         Library:Create('UIGradient', {
             Color = ColorSequence.new({
-                ColorSequenceKeypoint.new(0, Color3.new(1, 1, 1)),
-                ColorSequenceKeypoint.new(1, Color3.fromRGB(212, 212, 212))
-            });
+            ColorSequenceKeypoint.new(0, Color3.new(1, 1, 1)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(212, 212, 212))
+        });
             Rotation = 90;
             Parent = TextBoxInner;
         });
@@ -1922,18 +1922,18 @@ function Library:CreateWindow(...)
     else Config.Title = Arguments[1]; Config.AutoShow = Arguments[2] or false; end
     if type(Config.Title) ~= 'string' then Config.Title = 'No title' end
     if type(Config.TabPadding) ~= 'number' then Config.TabPadding = 0 end
-    if type(Config.MenuFadeTime) ~= 'number' then Config.MenuFadeTime = 0.2 end
+    if type(Config.MenuFadeTime) ~= 'number' then Config.MenuFadeTime = 0 end
     if typeof(Config.Position) ~= 'UDim2' then Config.Position = UDim2.fromOffset(175, 50) end
     if typeof(Config.Size) ~= 'UDim2' then Config.Size = UDim2.fromOffset(550, 600) end
     if Config.Center then Config.AnchorPoint = Vector2.new(0.5, 0.5); Config.Position = UDim2.fromScale(0.5, 0.5) end
 
     local Window = { Tabs = {}; };
 
-    -- ВНЕШНЯЯ РАМКА (черная обводка)
+    -- ЧЁРНАЯ РАМКА ОКНА (непрозрачная)
     local Outer = Library:Create('Frame', {
         AnchorPoint = Config.AnchorPoint,
         BackgroundColor3 = Color3.new(0, 0, 0);
-        BackgroundTransparency = 0; -- НЕПРОЗРАЧНАЯ (черная рамка)
+        BackgroundTransparency = 0;
         BorderSizePixel = 0;
         Position = Config.Position,
         Size = Config.Size,
@@ -1944,19 +1944,7 @@ function Library:CreateWindow(...)
 
     Library:MakeDraggable(Outer, 25);
 
-    -- ВНУТРЕННИЙ ФРЕЙМ С КАРТИНКОЙ-ФОНОМ
-    local Inner = Library:Create('Frame', {
-        BackgroundColor3 = Library.MainColor;
-        BackgroundTransparency = 1; -- ПРОЗРАЧНЫЙ (чтобы видеть картинку)
-        BorderColor3 = Library.AccentColor;
-        BorderMode = Enum.BorderMode.Inset;
-        Position = UDim2.new(0, 1, 0, 1);
-        Size = UDim2.new(1, -2, 1, -2);
-        ZIndex = 1;
-        Parent = Outer;
-    });
-
-    -- КАРТИНКА-ФОН (внутри Inner, на самом нижнем слое)
+    -- КАРТИНКА-ФОН ВНЕ ОКНА (в ScreenGui, чтобы анимация Fade её не трогала)
     local CustomBG = Library:Create('ImageLabel', {
         Image = "rbxassetid://87362885060054",
         BackgroundTransparency = 1,
@@ -1964,7 +1952,28 @@ function Library:CreateWindow(...)
         Position = UDim2.new(0, 0, 0, 0),
         ScaleType = Enum.ScaleType.Crop,
         ZIndex = 0,
-        Parent = Inner
+        Parent = ScreenGui
+    });
+
+    -- Приклеиваем картинку к окну
+    local function syncBg()
+        CustomBG.Position = UDim2.fromOffset(Outer.AbsolutePosition.X, Outer.AbsolutePosition.Y)
+        CustomBG.Size = UDim2.fromOffset(Outer.AbsoluteSize.X, Outer.AbsoluteSize.Y)
+    end
+    Outer:GetPropertyChangedSignal('AbsolutePosition'):Connect(syncBg)
+    Outer:GetPropertyChangedSignal('AbsoluteSize'):Connect(syncBg)
+    task.defer(syncBg)
+
+    -- ВНУТРЕННЯЯ РАМКА с синей обводкой (фон прозрачный, обводка синяя)
+    local Inner = Library:Create('Frame', {
+        BackgroundColor3 = Library.MainColor;
+        BackgroundTransparency = 1;
+        BorderColor3 = Library.AccentColor;
+        BorderMode = Enum.BorderMode.Inset;
+        Position = UDim2.new(0, 1, 0, 1);
+        Size = UDim2.new(1, -2, 1, -2);
+        ZIndex = 1;
+        Parent = Outer;
     });
 
     Library:AddToRegistry(Inner, {
@@ -1981,10 +1990,10 @@ function Library:CreateWindow(...)
         Parent = Inner;
     });
 
-    -- ОСНОВНАЯ ОБЛАСТЬ КОНТЕНТА (прозрачная, чтобы видеть картинку)
+    -- ОСНОВНАЯ ОБЛАСТЬ (полупрозрачная чёрная)
     local MainSectionOuter = Library:Create('Frame', {
-        BackgroundColor3 = Library.BackgroundColor;
-        BackgroundTransparency = 1; -- ПРОЗРАЧНАЯ
+        BackgroundColor3 = Color3.new(0, 0, 0);
+        BackgroundTransparency = 0.4;
         BorderColor3 = Library.OutlineColor;
         Position = UDim2.new(0, 8, 0, 25);
         Size = UDim2.new(1, -16, 1, -33);
@@ -1993,8 +2002,8 @@ function Library:CreateWindow(...)
     });
 
     local MainSectionInner = Library:Create('Frame', {
-        BackgroundColor3 = Library.BackgroundColor;
-        BackgroundTransparency = 1; -- ПРОЗРАЧНАЯ
+        BackgroundColor3 = Color3.new(0, 0, 0);
+        BackgroundTransparency = 0.4;
         BorderColor3 = Color3.new(0, 0, 0);
         BorderMode = Enum.BorderMode.Inset;
         Position = UDim2.new(0, 0, 0, 0);
@@ -2018,10 +2027,10 @@ function Library:CreateWindow(...)
         Parent = TabArea;
     });
 
-    -- КОНТЕЙНЕР ТАБОВ (прозрачный)
+    -- КОНТЕЙНЕР ТАБОВ (полупрозрачный чёрный)
     local TabContainer = Library:Create('Frame', {
-        BackgroundColor3 = Library.MainColor;
-        BackgroundTransparency = 1; -- ПРОЗРАЧНЫЙ
+        BackgroundColor3 = Color3.new(0, 0, 0);
+        BackgroundTransparency = 0.4;
         BorderColor3 = Library.OutlineColor;
         Position = UDim2.new(0, 8, 0, 30);
         Size = UDim2.new(1, -16, 1, -38);
@@ -2035,10 +2044,10 @@ function Library:CreateWindow(...)
         local Tab = { Groupboxes = {}; Tabboxes = {}; };
         local TabButtonWidth = Library:GetTextBounds(Name, Library.Font, 16);
 
-        -- ТАБЫ (непрозрачные, как обычно)
+        -- ТАБЫ (непрозрачные чёрные)
         local TabButton = Library:Create('Frame', {
-            BackgroundColor3 = Library.BackgroundColor;
-            BackgroundTransparency = 0; -- НЕПРОЗРАЧНЫЙ
+            BackgroundColor3 = Color3.new(0, 0, 0);
+            BackgroundTransparency = 0;
             BorderColor3 = Library.OutlineColor;
             Size = UDim2.new(0, TabButtonWidth + 8 + 4, 1, 0);
             ZIndex = 1;
@@ -2140,7 +2149,7 @@ function Library:CreateWindow(...)
 
         function Tab:HideTab()
             Blocker.BackgroundTransparency = 1;
-            TabButton.BackgroundColor3 = Library.BackgroundColor;
+            TabButton.BackgroundColor3 = Color3.new(0, 0, 0);
             Library.RegistryMap[TabButton].Properties.BackgroundColor3 = 'BackgroundColor';
             TabFrame.Visible = false;
         end;
@@ -2153,10 +2162,10 @@ function Library:CreateWindow(...)
         function Tab:AddGroupbox(Info)
             local Groupbox = {};
 
-            -- ГРУППБОКСЫ (прозрачные, чтобы видеть картинку)
+            -- ГРУППБОКСЫ (полупрозрачные чёрные)
             local BoxOuter = Library:Create('Frame', {
-                BackgroundColor3 = Library.BackgroundColor;
-                BackgroundTransparency = 1; -- ПРОЗРАЧНЫЙ
+                BackgroundColor3 = Color3.new(0, 0, 0);
+                BackgroundTransparency = 0.4;
                 BorderColor3 = Library.OutlineColor;
                 BorderMode = Enum.BorderMode.Inset;
                 Size = UDim2.new(1, 0, 0, 507 + 2);
@@ -2165,8 +2174,8 @@ function Library:CreateWindow(...)
             });
 
             local BoxInner = Library:Create('Frame', {
-                BackgroundColor3 = Library.BackgroundColor;
-                BackgroundTransparency = 1; -- ПРОЗРАЧНЫЙ
+                BackgroundColor3 = Color3.new(0, 0, 0);
+                BackgroundTransparency = 0.4;
                 BorderColor3 = Color3.new(0, 0, 0);
                 Size = UDim2.new(1, -2, 1, -2);
                 Position = UDim2.new(0, 1, 0, 1);
@@ -2233,8 +2242,8 @@ function Library:CreateWindow(...)
             local Tabbox = { Tabs = {}; };
 
             local BoxOuter = Library:Create('Frame', {
-                BackgroundColor3 = Library.BackgroundColor;
-                BackgroundTransparency = 1; -- ПРОЗРАЧНЫЙ
+                BackgroundColor3 = Color3.new(0, 0, 0);
+                BackgroundTransparency = 0.4;
                 BorderColor3 = Library.OutlineColor;
                 BorderMode = Enum.BorderMode.Inset;
                 Size = UDim2.new(1, 0, 0, 0);
@@ -2243,8 +2252,8 @@ function Library:CreateWindow(...)
             });
 
             local BoxInner = Library:Create('Frame', {
-                BackgroundColor3 = Library.BackgroundColor;
-                BackgroundTransparency = 1; -- ПРОЗРАЧНЫЙ
+                BackgroundColor3 = Color3.new(0, 0, 0);
+                BackgroundTransparency = 0.4;
                 BorderColor3 = Color3.new(0, 0, 0);
                 Size = UDim2.new(1, -2, 1, -2);
                 Position = UDim2.new(0, 1, 0, 1);
@@ -2296,7 +2305,7 @@ function Library:CreateWindow(...)
                     Parent = Button;
                 });
                 local Block = Library:Create('Frame', {
-                    BackgroundColor3 = Library.BackgroundColor;
+                    BackgroundColor3 = Color3.new(0, 0, 0);
                     BorderSizePixel = 0;
                     Position = UDim2.new(0, 0, 1, 0);
                     Size = UDim2.new(1, 0, 0, 1);
@@ -2321,7 +2330,7 @@ function Library:CreateWindow(...)
                 function Tab:Show()
                     for _, Tab in next, Tabbox.Tabs do Tab:Hide(); end;
                     Container.Visible = true; Block.Visible = true;
-                    Button.BackgroundColor3 = Library.BackgroundColor;
+                    Button.BackgroundColor3 = Color3.new(0, 0, 0);
                     Library.RegistryMap[Button].Properties.BackgroundColor3 = 'BackgroundColor';
                     Tab:Resize();
                 end;
@@ -2393,22 +2402,9 @@ function Library:CreateWindow(...)
         ModalElement.Modal = Toggled;
         if Toggled then
             Outer.Visible = true;
-            task.spawn(function()
-                local State = InputService.MouseIconEnabled;
-                local Cursor = Drawing.new('Triangle'); Cursor.Thickness = 1; Cursor.Filled = true; Cursor.Visible = true;
-                local CursorOutline = Drawing.new('Triangle'); CursorOutline.Thickness = 1; CursorOutline.Filled = false; CursorOutline.Color = Color3.new(0, 0, 0); CursorOutline.Visible = true;
-                while Toggled and ScreenGui.Parent do
-                    InputService.MouseIconEnabled = false;
-                    local mPos = InputService:GetMouseLocation();
-                    Cursor.Color = Library.AccentColor;
-                    Cursor.PointA = Vector2.new(mPos.X, mPos.Y); Cursor.PointB = Vector2.new(mPos.X + 16, mPos.Y + 6); Cursor.PointC = Vector2.new(mPos.X + 6, mPos.Y + 16);
-                    CursorOutline.PointA = Cursor.PointA; CursorOutline.PointB = Cursor.PointB; CursorOutline.PointC = Cursor.PointC;
-                    RenderStepped:Wait();
-                end;
-                InputService.MouseIconEnabled = State;
-                Cursor:Remove(); CursorOutline:Remove();
-            end);
+            CustomBG.Visible = true;
         end;
+        -- Анимация Fade НЕ затрагивает CustomBG, т.к. он не в Outer
         for _, Desc in next, Outer:GetDescendants() do
             local Properties = {};
             if Desc:IsA('ImageLabel') then table.insert(Properties, 'ImageTransparency'); table.insert(Properties, 'BackgroundTransparency');
@@ -2424,7 +2420,10 @@ function Library:CreateWindow(...)
             end;
         end;
         task.wait(FadeTime);
-        Outer.Visible = Toggled;
+        if not Toggled then
+            Outer.Visible = false;
+            CustomBG.Visible = false;
+        end;
         Fading = false;
     end
 
